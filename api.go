@@ -1,77 +1,24 @@
 package kvcore
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
-type ContactsPaginated struct {
-	CurrentPage uint16    `json:"current_page"`
-	Data        []Contact `json:"data"`
-	NextPageUrl string    `json:"next_page_url"`
-	PerPage     string    `json:"per_page"`
-	Total       uint32    `json:"total"`
-	LastPage    int       `json:"last_page"`
-	LastPageUrl string    `json:"last_page_url"`
-}
+const (
+	API_ROOT string = "https://api.kvcore.com/v2/public/"
+)
 
-type Contact struct {
-	Id      uint64 `json:"id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Status  uint   `json:"status"`
-	Private uint8  `json:"is_private"`
-}
-
+// Init the API client using the token obtained from the KvCore/ Lead Dropbox.
 type API struct {
 	Token string
 }
 
 type Paginator struct {
-	PageSize       uint16
-	OnPagedSuccess func(interface{})
-	OnPagedFailure func(error)
-}
-
-// ContactsByTags lists all contacts associated with all the hashtags provided
-func (api API) ContactsByTags(hashtags []string, paginator Paginator) {
-	hfs := []string{}
-	for _, v := range hashtags {
-		hfs = append(hfs, fmt.Sprintf("filter[hashtags][]=%s", v))
-	}
-	hf := ""
-	if len(hfs) > 0 {
-		hf = hf + "filter[hashtags_and_or]=AND&"
-		hf = hf + strings.Join(hfs, "&")
-	}
-	psz := paginator.PageSize
-	if psz == 0 {
-		psz = 1000
-	}
-	url := fmt.Sprintf("https://api.kvcore.com/v2/public/contacts?%s&limit=%d", hf, psz)
-
-	var contactsPaginated ContactsPaginated
-	page := 1
-	for url != "" {
-		rsp, err := api.get(url)
-		if err != nil {
-			paginator.OnPagedFailure(err)
-		}
-		fmt.Printf("Fetching page %d: %s\n", page, url)
-		page++
-		err = json.Unmarshal(rsp, &contactsPaginated)
-		if err != nil {
-			paginator.OnPagedFailure(err)
-		}
-		paginator.OnPagedSuccess(contactsPaginated.Data)
-		if contactsPaginated.NextPageUrl == url {
-			break
-		}
-		url = contactsPaginated.NextPageUrl
-	}
+	PageSize       uint16            // Default: 1000
+	OnPagedSuccess func(interface{}) // Consumer of every 'PageSize' collection fetched
+	OnPagedFailure func(error)       // Action on every failed iteration
 }
 
 func (api API) get(url string) ([]byte, error) {

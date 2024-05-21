@@ -16,8 +16,6 @@ Use the client to perform data retrieval, such as:
 
 ### Fetch all contacts by hashtags
 
-Define pagination property, including the size, and operations on each iteration
-
 ```go
 paginator := kvcore.Paginator{
 	PageSize: 100,
@@ -27,7 +25,9 @@ paginator := kvcore.Paginator{
 	},
 	OnPagedFailure: func(err error) {},
 }
-api.ContactsByTags(
-    []string{"hashtag_1", "hashtag_2"},
-    paginator)
+filter := ContactFilter{
+	Hashtags: []string{ "cool", "awesome" },
+	HashtagsAndOr: "AND",
+}
+api.ListContacts(filter, paginator)
 ```
