@@ -12,7 +12,7 @@ type ContactsPaginated struct {
 	CurrentPage uint16    `json:"current_page"`
 	Data        []Contact `json:"data"`
 	NextPageUrl string    `json:"next_page_url"`
-	PerPage     uint32    `json:"per_page"`
+	PerPage     string    `json:"per_page"`
 	Total       uint32    `json:"total"`
 	LastPage    int       `json:"last_page"`
 	LastPageUrl string    `json:"last_page_url"`
