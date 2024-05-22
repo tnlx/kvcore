@@ -28,6 +28,7 @@ paginator := kvcore.Paginator{
 filter := ContactFilter{
 	Hashtags: []string{ "cool", "awesome" },
 	HashtagsAndOr: "AND",
+	AssignedAgentId: 000000,
 }
 api.ListContacts(filter, paginator)
 ```
